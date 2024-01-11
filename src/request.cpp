@@ -5,22 +5,26 @@ request::request()
     body_state = 0;
 }
 
-int request::spl_req_body(std::string s1)
+request::request(std::string& root_path1){
+    root_path = root_path1;
+}
+
+int request::spl_reqh_body(std::string s1)
 {
     if (body_state){
         body += s1;
-        return 1;
+        return 0;
     }
     if (s1.find("\r\n\r\n", 0) != s1.npos)
     {
         body = s1.substr(s1.find("\r\n\r\n", 0) + 4);
-        req_h = s1.substr(0, s1.find("\r\n\r\n", 0));
+        std::cout << "--_______Lheaders Te9raw Kolhom________--\n" << std::endl;
+        req_h += s1.substr(0, s1.find("\r\n\r\n", 0));
+        std::cout <<"#################\n"<< req_h <<"\n##############"<< std::endl;
         body_state = 1;
         return 1;
     }
-    // std::cout << "$$$$$$" << std::endl;
-    req_h = s1;
-    // std::cout << req_h << std::endl;
+    req_h += s1;
     return 0;
 }
 
@@ -42,10 +46,12 @@ int request::parce_key(const std::string &key)
     return 1;
 }
 
-int request::check_path(const std::string& rpath){
+int request::check_path(){
     struct stat fileStat;
-    // rpath += path;
-    return stat(rpath.c_str(), &fileStat) == 0;
+    // r_path likykon wera (GET/POST/DELETE) <hada rah kayn>
+    // root_path path dyale root lifsrver wela flocation
+    req_path = root_path + r_path;
+    return stat(req_path.c_str(), &fileStat) == 0;
 }
 
 int request::parce_rline(const std::string &rline){
@@ -65,7 +71,7 @@ int request::parce_rline(const std::string &rline){
     // }
     r_path = tmp;
     std::getline(ss, tmp);
-     if (tmp != "HTTP/1.1\r" || tmp != "HTTP/1.1\r"){
+     if (tmp != "HTTP/1.1\r" && tmp != "HTTP/1.1"){
         std::cout << "ERROE: unkounu http version " << tmp << std::endl;
         return 0;
     }
@@ -93,12 +99,25 @@ int request::parce_line(const std::string &line)
     return 1;
 }
 
+
+int request::req_done(){
+    if (!body_state)
+        return 0;
+    if (headers.find("Content-Length") != headers.end()){
+        if (body.size() != atoi(&headers.find("Content-Length")->second[0]))
+        return 0;
+    }
+    return 1;
+}
+
 void request::parce_req(const std::string &req)
 {
+    std::cout << "----------- parse_req Bdat ------------\n";
     std::string line;
     int c_f_body = 0;
 
-    spl_req_body(req);
+    if (!spl_reqh_body(req))
+        return ;
     sstr << req_h;
     std::getline(sstr,line);
     if (!parce_rline(line))
@@ -106,20 +125,37 @@ void request::parce_req(const std::string &req)
     while (sstr.peek() != -1)
     {
         std::getline(sstr, line);
-        if (!parce_line(line))
+        if (line.size() && !parce_line(line))
             break;
     }
+    std::cout << "------------ parse_req Salat ------------\n";
 }
 
 void request::show_inf() const
 {
     std::map<std::string, std::string>::const_iterator it;
+    std::cout<<"request line -> : "<<type<<" "<< r_path<<" "<< http_v<< std::endl;
     for (it = headers.begin(); it != headers.end(); it++)
-        std::cout << "|" << it->first << " => " << it->second << "|" << std::endl;
-    std::cout << "\r\n\r\n ----<body>----" << body << std::endl;
+        std::cout << "||" << it->first << " => " << it->second << "||" << std::endl;
+    std::cout << "\n\n ----<body>---- \n" << body << std::endl;
 }
 
-request::~request()
-{
+request& request::operator=(const request& oth){
+    if (this != &oth){
+        body_state = oth.body_state;
+        type = oth.type;
+        r_path = oth.r_path;
+        http_v = oth.http_v;
+        body = oth.body;
+        headers = oth.headers;
+    }
+    return *this;
+}
+
+request::request(const request& req1){
+    *this = req1;
+}
+
+request::~request(){
     ;
 }

@@ -26,18 +26,5 @@ void test(const std::string& file_name)
 
 int main(){
     m_server();
-    // std::string s1;
-    // std::string s2;
-    // std::stringstream ss;
-    // ss<<s;
-    // while (ss.peek() != -1){
-    //     getline(ss,s1);
-    //     s2 += s1;
-    // }
-    // s1 = ss.str();
     // test("request.txt");
-    
-
-    // std::cout <<"|"<< ss.str() <<"|"<< std::endl;
-    // std::cout <<"<"<< s2 <<">"<< std::endl;
 }

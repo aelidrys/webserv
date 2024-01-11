@@ -5,41 +5,38 @@
 #include <fcntl.h>
 
 #ifndef PORT
-#define PORT 8080
+#define PORT 8000
 #endif
 
 #define MAX_EVENTS 10
 struct epoll_event ev, events[MAX_EVENTS];
 int listen_sock, conn_sock, nfds, epollfd;
 
-/* Code to set up listening socket, 'listen_sock',
-    (socket(), bind(), listen()) omitted. */
-
 void setnonblocking(int con_sockit){
-    // fcntl(con_sockit, F_SETFL , O_NONBLOCK);
     fcntl(con_sockit, F_SETFL , fcntl(con_sockit, F_GETFL, 0) | O_NONBLOCK);
 }
 
-void do_use_fd(int con_sockit){
-    request req;
-    char buff[1024];
-    ssize_t read_size = read(con_sockit, buff, 1024);
+void do_use_fd(int con_sockit, request& req){
+    size_t buff_size = 1024;
+    char buff[buff_size];
+    // std::string s_buff;
+    // s_buff.resize(1024);
+    ssize_t read_size = read(con_sockit, buff, buff_size-1);
     if (read_size == 0){
+        // req.show_inf();
         close(con_sockit);
         std::cout << "con_sockit closed" << std::endl;
+        return ;
     }
     if (read_size == -1){
         close(con_sockit);
+        std::cerr << "Chehaja Mahyach Had Le3jeb Fila" << std::endl;
         return ;
     }
     buff[read_size] = '\0';
-    std::string hello = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: 12\r\n\r\nHello world!\n";
-    write(con_sockit, hello.c_str(), hello.size());
-    printf("----------->   :    %s\n", buff);
-    printf("lenth   :    %zu\n\n\n", strlen(buff));
+    printf("LENTH = %zu \n>>------ Hadchi Lireadina ------<<\n", strlen(buff));
+    printf("%s\n<<---------- Safi Rah Sala -------->>\n\n", buff);
     req.parce_req(buff);
-    req.show_inf();
-
 }
 
 void m_server(){
@@ -86,13 +83,14 @@ void m_server(){
         exit(EXIT_FAILURE);
     }
 
+    request req;
     for (;;) {
         nfds = epoll_wait(epollfd, events, MAX_EVENTS, -1);
         if (nfds == -1) {
             perror("epoll_wait");
             exit(EXIT_FAILURE);
         }
-
+        
         for (int n = 0; n < nfds; ++n) {
             if (events[n].data.fd == listen_sock) {
                 conn_sock = accept(listen_sock,(struct sockaddr *)&address, (socklen_t *)&addrlen);
@@ -100,20 +98,30 @@ void m_server(){
                     perror("accept");
                     exit(EXIT_FAILURE);
                 }
-                // setnonblocking(conn_sock);
-                ev.events = EPOLLIN | EPOLLET;
+                ev.events = EPOLLIN | EPOLLOUT;
                 ev.data.fd = conn_sock;
-                if (epoll_ctl(epollfd, EPOLL_CTL_ADD, conn_sock,
-                            &ev) == -1) {
+                if (epoll_ctl(epollfd, EPOLL_CTL_ADD, conn_sock,&ev) == -1) {
                     perror("epoll_ctl: conn_sock");
                     exit(EXIT_FAILURE);
                 }
-            } else {
-                do_use_fd(events[n].data.fd);
+            } 
+            else {
+                if (events[n].events & EPOLLIN){
+                    std::cerr << "-------- do_use_fd Bdat --------"<<std::endl;
+                    do_use_fd(events[n].data.fd, req);
+                    std::cerr << "------------ do_use_fd Salat -----------\n"<<std::endl;
+                }    
+                else if (events[n].events & EPOLLOUT && req.req_done()){
+                    std::cerr << "Nchofo Had req_done Chehal :"<<req.req_done()<<std::endl;
+                    std::cerr << "Nchofo Had fd Chehal :"<<events[n].data.fd<<std::endl;
+                    std::string hello = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: 12\r\n\r\nHello world!\n";
+                    write(events[n].data.fd, hello.c_str(), hello.size());
+                    close(events[n].data.fd);
+                    req.show_inf();
+                }
             }
         }
     }
-
 }
 
 

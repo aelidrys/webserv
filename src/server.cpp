@@ -6,7 +6,7 @@
 
 
 #ifndef PORT
-#define PORT 8080
+#define PORT 8000
 #endif
 
 void server(){
