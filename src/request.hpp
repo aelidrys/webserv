@@ -18,12 +18,6 @@ class request
 std::stringstream sstr;
 std::string req_h;
 std::string root_path;
-protected:
-    std::string host;
-    std::string connection;
-    std::string Accept;
-    std::string Accept_Encoding;
-    std::string User_Agent;
 public:
     int body_state;
     std::string type;

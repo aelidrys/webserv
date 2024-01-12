@@ -3,6 +3,7 @@
 request::request()
 {
     body_state = 0;
+    root_path = "/nfs/homes/aelidrys/Desktop/webserv";
 }
 
 request::request(std::string& root_path1){
@@ -12,19 +13,19 @@ request::request(std::string& root_path1){
 int request::spl_reqh_body(std::string s1)
 {
     if (body_state){
-        body += s1;
+        body = s1;
         return 0;
     }
     if (s1.find("\r\n\r\n", 0) != s1.npos)
     {
         body = s1.substr(s1.find("\r\n\r\n", 0) + 4);
         std::cout << "--_______Lheaders Te9raw Kolhom________--\n" << std::endl;
-        req_h += s1.substr(0, s1.find("\r\n\r\n", 0));
+        req_h = s1.substr(0, s1.find("\r\n\r\n", 0));
         std::cout <<"#################\n"<< req_h <<"\n##############"<< std::endl;
         body_state = 1;
         return 1;
     }
-    req_h += s1;
+    // req_h += s1;
     return 0;
 }
 
@@ -48,8 +49,6 @@ int request::parce_key(const std::string &key)
 
 int request::check_path(){
     struct stat fileStat;
-    // r_path likykon wera (GET/POST/DELETE) <hada rah kayn>
-    // root_path path dyale root lifsrver wela flocation
     req_path = root_path + r_path;
     return stat(req_path.c_str(), &fileStat) == 0;
 }
@@ -60,16 +59,16 @@ int request::parce_rline(const std::string &rline){
     ss<<rline;
     std::getline(ss, tmp, ' ');
     if (tmp != "GET" && tmp != "POST" && tmp != "DELETE"){
-        std::cout << "ERROE: unkounu method " << tmp << std::endl;
+        std::cerr << "ERROE: unkounu method " << tmp << std::endl;
         return 0;
     }
     type = tmp;
     std::getline(ss, tmp, ' ');
-    // if (check_path(tmp)){
-    //     std::cout << "ERROE: unkounu path " << tmp << std::endl;
-    //     return 0;
-    // }
     r_path = tmp;
+    if (!check_path()){
+        std::cout << "ERROE: unkounu path " << tmp << std::endl;
+        return 0;
+    }
     std::getline(ss, tmp);
      if (tmp != "HTTP/1.1\r" && tmp != "HTTP/1.1"){
         std::cout << "ERROE: unkounu http version " << tmp << std::endl;

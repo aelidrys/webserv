@@ -107,13 +107,13 @@ void m_server(){
             } 
             else {
                 if (events[n].events & EPOLLIN){
-                    std::cerr << "-------- do_use_fd Bdat --------"<<std::endl;
+                    std::cout << "-------- do_use_fd Bdat --------"<<std::endl;
                     do_use_fd(events[n].data.fd, req);
-                    std::cerr << "------------ do_use_fd Salat -----------\n"<<std::endl;
+                    std::cout << "------------ do_use_fd Salat -----------\n"<<std::endl;
                 }    
                 else if (events[n].events & EPOLLOUT && req.req_done()){
-                    std::cerr << "Nchofo Had req_done Chehal :"<<req.req_done()<<std::endl;
-                    std::cerr << "Nchofo Had fd Chehal :"<<events[n].data.fd<<std::endl;
+                    std::cout << "Nchofo Had req_done Chehal :"<<req.req_done()<<std::endl;
+                    std::cout << "Nchofo Had fd Chehal :"<<events[n].data.fd<<std::endl;
                     std::string hello = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: 12\r\n\r\nHello world!\n";
                     write(events[n].data.fd, hello.c_str(), hello.size());
                     close(events[n].data.fd);
