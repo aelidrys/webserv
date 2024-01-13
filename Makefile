@@ -2,7 +2,7 @@ NAME = webser
 
 CXX = c++
 
-CPPFLAG = -Wall -Wextra -Werror -std=98++
+CPPFLAG = -Wall -Wextra -Werror -std=c++98
 
 SRC_DIR = src
 
@@ -15,10 +15,10 @@ OBJ = $(patsubst $(SRC_DIR)/%.cpp, $(OBJ_DIR)/%.o, $(SRC))
 all : $(NAME)
 
 $(NAME) : $(OBJ)
-	$(CXX) $(OBJ) -o $(NAME)
+	$(CXX) $(CPPFLAG) $(OBJ) -o $(NAME)
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp | $(OBJ_DIR)
-	$(CXX) -c $< -o $@
+	$(CXX) $(CPPFLAG) -c $< -o $@
 
 $(OBJ_DIR):
 	mkdir -p $(OBJ_DIR)

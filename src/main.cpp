@@ -6,7 +6,7 @@ void test(const string& file_name)
     ifstream in_file;
     string str;
     string str_req;
-    in_file.open(file_name, ios::in);
+    in_file.open(file_name.c_str(), ios::in);
     if (in_file.fail()){
         cout << "ERROR: in input file\n";
         return ;
