@@ -27,5 +27,18 @@ void test(const string& file_name)
 int main(){
     multiblex mlt;
     mlt.m_server();
+    // int fd = open("request.txt", O_RDWR);
+    // int b_size = 1000, reading_s;
+    // string str;
+    // str.resize(b_size);
+    // for (size_t i = 0; i < 10; i++)
+    // {
+    //     reading_s = read (fd, &str[0], b_size);
+    //     if (!reading_s)
+    //         cout<<"readina ZIROOO"<<endl;
+    //     else
+    //         cout<<"readina : "<<reading_s<<endl;
+    // }
+    
     // test("request.txt");
 }

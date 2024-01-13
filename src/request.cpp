@@ -13,7 +13,7 @@ request::request(string& root_path1){
 int request::spl_reqh_body(string s1)
 {
     if (body_state){
-        body = s1;
+        body += s1;
         return 0;
     }
     if (s1.find("\r\n\r\n", 0) != s1.npos)

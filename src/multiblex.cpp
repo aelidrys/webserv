@@ -6,6 +6,7 @@ multiblex::multiblex(){
     address.sin_family = AF_INET;
     address.sin_addr.s_addr = INADDR_ANY;
     address.sin_port = htons( PORT );
+    hello = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: 12\r\n\r\nHello world!\n";
     if ((listen_sock = socket(AF_INET, SOCK_STREAM, 0)) == 0){
         perror("In socket");
         exit(EXIT_FAILURE);
@@ -101,7 +102,6 @@ void multiblex::m_server(){
                 else if (events[n].events & EPOLLOUT && req.req_done()){
                     cout << "Nchofo Had req_done Chehal :"<<req.req_done()<<endl;
                     cout << "Nchofo Had fd Chehal :"<<events[n].data.fd<<endl;
-                    string hello = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: 12\r\n\r\nHello world!\n";
                     write(events[n].data.fd, hello.c_str(), hello.size());
                     close(events[n].data.fd);
                     req.show_inf();

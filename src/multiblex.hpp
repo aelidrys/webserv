@@ -17,6 +17,7 @@
 
 class multiblex
 {
+string hello;
 public:
     struct sockaddr_in address;
     struct epoll_event ev, events[MAX_EVENTS];
