@@ -1,7 +1,6 @@
 #include "multiblex.hpp"
 
 multiblex::multiblex(){
-
     addrlen = sizeof(address);
     address.sin_family = AF_INET;
     address.sin_addr.s_addr = INADDR_ANY;
@@ -30,9 +29,6 @@ multiblex::multiblex(){
 }
 
 
-void setnonblocking(int con_sockit){
-    fcntl(con_sockit, F_SETFL , fcntl(con_sockit, F_GETFL, 0) | O_NONBLOCK);
-}
 
 void multiblex::do_use_fd(int con_sockit, request& req){
     size_t buff_size = 1024;
@@ -44,8 +40,8 @@ void multiblex::do_use_fd(int con_sockit, request& req){
         return ;
     }
     if (read_size == -1){
-        close(con_sockit);
         cerr << "Chehaja Mahyach Had Le3jeb Fila" << endl;
+        close(con_sockit);
         return ;
     }
     buff[read_size] = '\0';
@@ -53,6 +49,7 @@ void multiblex::do_use_fd(int con_sockit, request& req){
     printf("%s\n<<---------- Safi Rah Sala -------->>\n\n", buff);
     req.parce_req(string("").append(buff, read_size));
 }
+
 
 void multiblex::m_server(){
 
@@ -105,6 +102,7 @@ void multiblex::m_server(){
                     write(events[n].data.fd, hello.c_str(), hello.size());
                     close(events[n].data.fd);
                     req.show_inf();
+                    req.body_state = 0;
                 }
             }
         }
@@ -116,3 +114,7 @@ multiblex::~multiblex(){
     ;
 }
 
+
+// void setnonblocking(int con_sockit){
+//     fcntl(con_sockit, F_SETFL , fcntl(con_sockit, F_GETFL, 0) | O_NONBLOCK);
+// }

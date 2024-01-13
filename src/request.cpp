@@ -3,17 +3,21 @@
 request::request()
 {
     body_state = 0;
+    body_size = 0;
     root_path = "/nfs/homes/aelidrys/Desktop/webserv";
 }
 
 request::request(string& root_path1){
+    body_state = 0;
+    body_size = 0;
     root_path = root_path1;
 }
 
 int request::spl_reqh_body(string s1)
 {
     if (body_state){
-        body += s1;
+        body = s1;
+        body_size += body.size();
         return 0;
     }
     if (s1.find("\r\n\r\n", 0) != s1.npos)
@@ -23,9 +27,9 @@ int request::spl_reqh_body(string s1)
         req_h = s1.substr(0, s1.find("\r\n\r\n", 0));
         cout <<"#################\n"<< req_h <<"\n##############"<< endl;
         body_state = 1;
+        body_size = body.size();
         return 1;
     }
-    // req_h += s1;
     return 0;
 }
 
@@ -102,10 +106,9 @@ int request::parce_line(const string &line)
 int request::req_done(){
     if (!body_state)
         return 0;
-    // cout << "body_size = " << body.size() << endl;
-    // cout << "body\n **********\n " << body <<"**********"<< endl;
+    // cout << "body_size  = "<<body_size<<"| C_L = "<<(size_t)atoi(&headers.find("Content-Length")->second[0]) << endl;
     if (headers.find("Content-Length") != headers.end()){
-        if (body.size() != atoi(&headers.find("Content-Length")->second[0]))
+        if (body_size != (size_t)atoi(&headers.find("Content-Length")->second[0]))
         return 0;
     }
     return 1;
@@ -137,12 +140,14 @@ void request::show_inf() const
     cout<<"request line -> : "<<type<<" "<< r_path<<" "<< http_v<< endl;
     for (it = headers.begin(); it != headers.end(); it++)
         cout << "||" << it->first << " => " << it->second << "||" << endl;
-    cout << "\n\n ----<body>---- \n" << body << endl;
+    cout << "\n$$$$  body_size = "<<body_size;
+    cout <<" $$$$$\n ----<body>---- \n" << body << endl;
 }
 
 request& request::operator=(const request& oth){
     if (this != &oth){
         body_state = oth.body_state;
+        body_size = oth.body_size;
         type = oth.type;
         r_path = oth.r_path;
         req_path = oth.req_path;

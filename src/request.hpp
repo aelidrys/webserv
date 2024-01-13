@@ -19,6 +19,7 @@ std::stringstream sstr;
 std::string req_h;
 std::string root_path;
 public:
+    size_t body_size;
     int body_state;
     std::string type;
     std::string r_path;
