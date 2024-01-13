@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <sys/stat.h>
-
+using namespace std;
 
 #ifndef REQUEST_HPP
 #define REQUEST_HPP
