@@ -1,24 +1,16 @@
-#include <iostream>
-#include <vector>
-#include <map>
-#include <sstream>
-#include <fstream>
-#include <string.h>
-#include <unistd.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <sys/stat.h>
+#include "Get.hpp"
 using namespace std;
 
 #ifndef REQUEST_HPP
 #define REQUEST_HPP
 
-class request
+class Request
 {
 std::stringstream sstr;
 std::string req_h;
 std::string root_path;
 public:
+    Method* method;
     size_t body_size;
     int body_state;
     std::string type;
@@ -28,11 +20,12 @@ public:
     std::string body;
     std::map<std::string, std::string> headers;
 
-    request();
-    request(std::string& root_path);
-    request(const request& req);
-    request& operator=(const request& oth);
+    Request();
+    Request(std::string& root_path);
+    Request(const Request& req);
+    Request& operator=(const Request& oth);
     void parce_req(const std::string& req1);
+    void process_req(const string &req);
     void show_inf() const;
     int parce_line(const std::string& line);
     int check_path();
@@ -40,7 +33,8 @@ public:
     int parce_key(const std::string& key);
     int spl_reqh_body(std::string s1);
     int req_done();
-    ~request();
+    Method* create_method(const string &type);
+    ~Request();
 };
 
 void m_server();

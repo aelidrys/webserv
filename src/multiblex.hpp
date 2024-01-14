@@ -1,4 +1,4 @@
-#include "request.hpp"
+#include "Request.hpp"
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <sys/epoll.h>
@@ -17,7 +17,7 @@
 
 class multiblex
 {
-string hello;
+string respons;
 public:
     struct sockaddr_in address;
     struct epoll_event ev, events[MAX_EVENTS];
@@ -26,7 +26,7 @@ public:
     int listen_sock;
     multiblex();
     void m_server();
-    void do_use_fd(int con_sockit, request& req);
+    void do_use_fd(int con_sockit, Request& req);
     ~multiblex();
 };
 

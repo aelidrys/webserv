@@ -5,7 +5,7 @@ multiblex::multiblex(){
     address.sin_family = AF_INET;
     address.sin_addr.s_addr = INADDR_ANY;
     address.sin_port = htons( PORT );
-    hello = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: 12\r\n\r\nHello world!\n";
+    respons = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: 12\r\n\r\nHello world!\n";
     if ((listen_sock = socket(AF_INET, SOCK_STREAM, 0)) == 0){
         perror("In socket");
         exit(EXIT_FAILURE);
@@ -30,10 +30,10 @@ multiblex::multiblex(){
 
 
 
-void multiblex::do_use_fd(int con_sockit, request& req){
+void multiblex::do_use_fd(int con_sockit, Request& req){
     size_t buff_size = 1024;
     char buff[buff_size];
-    ssize_t read_size = read(con_sockit, buff, buff_size-1);
+    ssize_t read_size = read(con_sockit, buff, buff_size);
     if (read_size == 0){
         close(con_sockit);
         cout << "con_sockit closed" << endl;
@@ -44,10 +44,9 @@ void multiblex::do_use_fd(int con_sockit, request& req){
         close(con_sockit);
         return ;
     }
-    buff[read_size] = '\0';
-    printf("LENTH = %zu \n>>------ Hadchi Lireadina ------<<\n", read_size);
-    printf("%s\n<<---------- Safi Rah Sala -------->>\n\n", buff);
-    req.parce_req(string("").append(buff, read_size));
+    // printf("LENTH = %zu \n>>------ Hadchi Lireadina ------<<\n", read_size);
+    // printf("%s\n<<---------- Safi Rah Sala -------->>\n\n", buff);
+    req.process_req(string("").append(buff, read_size));
 }
 
 
@@ -67,9 +66,9 @@ void multiblex::m_server(){
         exit(EXIT_FAILURE);
     }
 
-    request req;
+    Request req;
     int nfds;
-    for (;;) {
+    while (1) {
         nfds = epoll_wait(epollfd, events, MAX_EVENTS, -1);
         if (nfds == -1) {
             perror("epoll_wait");
@@ -99,7 +98,7 @@ void multiblex::m_server(){
                 else if (events[n].events & EPOLLOUT && req.req_done()){
                     cout << "Nchofo Had req_done Chehal :"<<req.req_done()<<endl;
                     cout << "Nchofo Had fd Chehal :"<<events[n].data.fd<<endl;
-                    write(events[n].data.fd, hello.c_str(), hello.size());
+                    write(events[n].data.fd, respons.c_str(), respons.size());
                     close(events[n].data.fd);
                     req.show_inf();
                     req.body_state = 0;

@@ -2,7 +2,7 @@
 
 void test(const string& file_name)
 {
-    request req;
+    Request req;
     ifstream in_file;
     string str;
     string str_req;
@@ -24,21 +24,18 @@ void test(const string& file_name)
 
 }
 
+struct integers{
+    integers(){
+        a = 4;
+        b = 5;
+        c = 6;
+    }
+    int a; 
+    int b;
+    int c; 
+};
+
 int main(){
     multiblex mlt;
     mlt.m_server();
-    // int fd = open("request.txt", O_RDWR);
-    // int b_size = 1000, reading_s;
-    // string str;
-    // str.resize(b_size);
-    // for (size_t i = 0; i < 10; i++)
-    // {
-    //     reading_s = read (fd, &str[0], b_size);
-    //     if (!reading_s)
-    //         cout<<"readina ZIROOO"<<endl;
-    //     else
-    //         cout<<"readina : "<<reading_s<<endl;
-    // }
-    
-    // test("request.txt");
 }
