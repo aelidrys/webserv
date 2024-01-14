@@ -14,6 +14,7 @@
 
 class Method
 {
+
 public:
     std::string r_path;
     std::string req_path;

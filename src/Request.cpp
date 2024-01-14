@@ -7,6 +7,7 @@ Request::Request()
     root_path = "/nfs/homes/aelidrys/Desktop/webserv";
 }
 
+
 Request::Request(string& root_path1){
     body_state = 0;
     body_size = 0;

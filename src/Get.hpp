@@ -6,6 +6,7 @@ using namespace std;
 #ifndef GET_HPP
 #define GET_HPP
 
+
 class Get : public Method
 {
 string body;
