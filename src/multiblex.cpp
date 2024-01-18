@@ -5,7 +5,6 @@ multiblex::multiblex(){
     address.sin_family = AF_INET;
     address.sin_addr.s_addr = INADDR_ANY;
     address.sin_port = htons( PORT );
-    respons = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: 12\r\n\r\nHello world!\n";
     if ((listen_sock = socket(AF_INET, SOCK_STREAM, 0)) == 0){
         perror("In socket");
         exit(EXIT_FAILURE);
@@ -28,9 +27,26 @@ multiblex::multiblex(){
     }
 }
 
+void multiblex::add_client(){
+    int conn_sock;
+    conn_sock = accept(listen_sock,(struct sockaddr *)&address, (socklen_t *)&addrlen);
+    if (conn_sock == -1) {
+        perror("accept");
+        exit(EXIT_FAILURE);
+    }
+    cout<<"conn_sck = "<<conn_sock<<endl;
+    client[conn_sock] = Request();
+    ev.events = EPOLLIN | EPOLLOUT;
+    ev.data.fd = conn_sock;
+    if (epoll_ctl(epollfd, EPOLL_CTL_ADD, conn_sock,&ev) == -1) {
+        perror("epoll_ctl: conn_sock");
+        exit(EXIT_FAILURE);
+    }
+}
 
-void multiblex::do_use_fd(int con_sockit, Request& req){
-    size_t buff_size = 1024;
+
+void multiblex::do_use_fd(int con_sockit){
+    size_t buff_size = 1000;
     char buff[buff_size];
     ssize_t read_size = read(con_sockit, buff, buff_size);
     if (read_size == 0){
@@ -43,15 +59,37 @@ void multiblex::do_use_fd(int con_sockit, Request& req){
         close(con_sockit);
         return ;
     }
-    // printf("LENTH = %zu \n>>------ Hadchi Lireadina ------<<\n", read_size);
-    // printf("%s\n<<---------- Safi Rah Sala -------->>\n\n", buff);
-    req.process_req(string("").append(buff, read_size));
+    client[con_sockit].process_req(string("").append(buff, read_size), read_size);
 }
 
+void multiblex::use_clinet_fd(int con_sockit, int n){
+
+    if (events[n].events & EPOLLIN){
+        cout << "-------- do_use_fd Bdat -------- fd = "<<con_sockit<<endl;
+        do_use_fd(con_sockit);
+        cout << "------------ do_use_fd Salat -----------\n"<<endl;
+    }    
+    else if (client[con_sockit].body_state){
+        client[con_sockit].process_req("",0);
+        cout << "Nchofo Had fd Chehal :"<<con_sockit<<endl;
+        if (!client[con_sockit].method || client[con_sockit].method->end){
+            respons = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: ";
+            stringstream ss;
+            ss << client[con_sockit].get_respons().length();
+            respons += ss.str();
+            respons += string("\r\n\r\n");
+            respons += client[con_sockit].get_respons();
+            write(con_sockit, respons.c_str(), respons.size());
+            close(con_sockit);
+            epoll_ctl(epollfd, EPOLL_CTL_DEL, con_sockit, &ev);
+            client.erase(con_sockit);
+
+        }
+    }
+}
 
 void multiblex::m_server(){
 
-    int conn_sock, epollfd;
     epollfd = epoll_create1(0);
     if (epollfd == -1) {
         perror("epoll_create1");
@@ -65,7 +103,6 @@ void multiblex::m_server(){
         exit(EXIT_FAILURE);
     }
 
-    Request req;
     int nfds;
     while (1) {
         nfds = epoll_wait(epollfd, events, MAX_EVENTS, -1);
@@ -73,36 +110,11 @@ void multiblex::m_server(){
             perror("epoll_wait");
             exit(EXIT_FAILURE);
         }
-        
         for (int n = 0; n < nfds; ++n) {
-            if (events[n].data.fd == listen_sock) {
-                conn_sock = accept(listen_sock,(struct sockaddr *)&address, (socklen_t *)&addrlen);
-                if (conn_sock == -1) {
-                    perror("accept");
-                    exit(EXIT_FAILURE);
-                }
-                ev.events = EPOLLIN | EPOLLOUT;
-                ev.data.fd = conn_sock;
-                if (epoll_ctl(epollfd, EPOLL_CTL_ADD, conn_sock,&ev) == -1) {
-                    perror("epoll_ctl: conn_sock");
-                    exit(EXIT_FAILURE);
-                }
-            } 
-            else {
-                if (events[n].events & EPOLLIN){
-                    cout << "-------- do_use_fd Bdat --------"<<endl;
-                    do_use_fd(events[n].data.fd, req);
-                    cout << "------------ do_use_fd Salat -----------\n"<<endl;
-                }    
-                else if (events[n].events & EPOLLOUT && req.req_done()){
-                    cout << "Nchofo Had req_done Chehal :"<<req.req_done()<<endl;
-                    cout << "Nchofo Had fd Chehal :"<<events[n].data.fd<<endl;
-                    write(events[n].data.fd, respons.c_str(), respons.size());
-                    close(events[n].data.fd);
-                    req.show_inf();
-                    req.body_state = 0;
-                }
-            }
+            if (events[n].data.fd == listen_sock) 
+                add_client();
+            else
+                use_clinet_fd(events[n].data.fd, n);
         }
     }
 }

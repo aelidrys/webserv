@@ -19,6 +19,8 @@
 class multiblex
 {
 string respons;
+map<int, Request> client;
+int epollfd;
 public:
     struct sockaddr_in address;
     struct epoll_event ev, events[MAX_EVENTS];
@@ -27,7 +29,9 @@ public:
     int listen_sock;
     multiblex();
     void m_server();
-    void do_use_fd(int con_sockit, Request& req);
+    void do_use_fd(int con_sockit);
+    void use_clinet_fd(int con_sockit, int n);
+    void add_client();
     ~multiblex();
 };
 

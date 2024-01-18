@@ -11,11 +11,14 @@ class Get : public Method
 {
 string body;
 int body_size;
-public:
+int opened;
+int fd;
+public:    
     Get();
     Get(const Get& oth);
     Get& operator=(const Get& oth);
     void process(std::string body, size_t body_size);
+    void open_file();
     ~Get();
 };
 
