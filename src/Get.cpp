@@ -1,14 +1,31 @@
 #include "Get.hpp"
+#include <sys/stat.h>
+
 
 Get::Get(){
+    types["html"] = "text/html";
+    types["htm"] = "text/html";
+    types["css"] = "text/css";
+    types["jpeg"] = "image/jpeg";
+    types["jpg"] = "image/jpeg";
+    types["png"] = "image/png";
+    types["gif"] = "image/gif";
+    types["json"] = "application/json";
     end = 0;
     opened = 0;
 }
 
 Get::Get(const Get& oth){
+    types["html"] = "text/html";
+    types["htm"] = "text/html";
+    types["css"] = "text/css";
+    types["jpeg"] = "image/jpeg";
+    types["jpg"] = "image/jpeg";
+    types["png"] = "image/png";
+    types["gif"] = "image/gif";
+    types["json"] = "application/json";
     *this = oth;
 }
-
 
 Get& Get::operator=(const Get& oth){
     if (this != &oth){
@@ -22,17 +39,47 @@ Get& Get::operator=(const Get& oth){
     return *this;
 }
 
-void Get::open_file(){
-
-    fd = open(req_path.c_str(), O_RDWR);
-    if (fd == -1){
-        string index = "/default.html";
-        string tmp = req_path+index;
-        fd = open(tmp.c_str(), O_RDWR);
+void Get::set_content_type(){
+    size_t pos = r_path.find(".");
+    if (pos != string::npos && pos+1 < r_path.size()){
+        if (types.find(r_path.substr(pos+1)) != types.end())
+            content_type = types.find(r_path.substr(pos+1))->second;
+        else
+            content_type = "application/octet-stream";
     }
+    else
+        content_type = "application/octet-stream";
+}
+
+void Get::open_file(){
+    string tmp = req_path;
+    string index = "/default.html";
+    cout<<"open file"<<endl;
+    if (opendir(req_path.c_str())){
+        tmp += index;
+        content_type = "text/html";
+        cout<<"path joined"<<endl;
+    }
+    else
+        set_content_type();
+    src_file.open(tmp.c_str(), ios::in);
     opened = 1;
-    if (fd == -1)
+    if (!src_file.is_open()){
         opened = -1;
+        cout<<"open file "<<tmp<<" faild"<<endl;
+        return;
+    }
+
+    src_file.seekg(0, std::ios::end);
+    file_len = src_file.tellg();
+    src_file.seekg(0, std::ios::beg);
+    respons = "HTTP/1.1 200 OK\r\nContent-Type: ";
+    respons +=  content_type+string("\r\nContent-Length: ");
+    stringstream ss;
+    ss<<file_len;
+    respons += ss.str();
+    respons += string("\r\n\r\n");
+    cout<<"file_len: "<<file_len<<endl;
 }
 
 void Get::process(std::string _body, size_t _body_size){
@@ -40,22 +87,28 @@ void Get::process(std::string _body, size_t _body_size){
     body_size = _body_size;
 
     cout << "GET Request Enter" << endl;
+    respons = "";
     if (!opened)
         open_file();
-    ssize_t r_len, max_r = 2000;
-    if (fd >= 0){
+    ssize_t r_len, max_r = 1000;
+
+    if (opened == 1){
         string res;
         res.resize(max_r);
-        r_len = read(fd, &res[0], max_r);
-        if (r_len < max_r)
+        src_file.read(&res[0], max_r);
+        r_len = src_file.gcount();
+        if (src_file.gcount() < max_r)
             end = 1;
         res.resize(r_len);
+        cout<<"r_len: "<<r_len<<"\nend: "<<end<<endl;
         respons += res;
-        return ;
     }
-    end = 1;
-    respons = "URI Not Found";
-    cout << "GET Request End" << endl;
+
+    if (opened == -1){
+        end = 1;
+        respons = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: 13\r\n\r\nURI Not Found";
+        cout << "GET Request End" << endl;
+    }
 }
 
 Get::~Get(){

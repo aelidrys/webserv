@@ -2,11 +2,10 @@
 
 Request::Request()
 {
-    cout<<"DEfault-->"<<endl;
     method = NULL;
     body_state = 0;
     body_size = 0;
-    root_path = "/nfs/homes/aelidrys/Desktop/webserv";
+    root_path = "/nfs/homes/aelidrys/Desktop/webserv/root_dir";
 }
 
 
@@ -24,7 +23,7 @@ Request::Request(const Request& req1){
 
 Request& Request::operator=(const Request& oth){
     if (this != &oth){
-        delete (method);
+        delete method;
         method = oth.method;
         body_state = oth.body_state;
         body_size = oth.body_size;
@@ -51,7 +50,7 @@ int Request::spl_reqh_body(string s1)
         body = s1.substr(s1.find("\r\n\r\n", 0) + 4);
         cout << "--_______Lheaders Te9raw Kolhom________--\n" << endl;
         req_h += s1.substr(0, s1.find("\r\n\r\n", 0));
-        cout <<"#################\n"<< req_h <<"\n##############"<< endl;
+        // cout <<"#################\n"<< req_h <<"\n##############"<< endl;
         body_state = 1;
         body_size = body.size();
         return 1;

@@ -25,6 +25,12 @@ multiblex::multiblex(){
         perror("In listen");
         exit(EXIT_FAILURE);
     }
+    
+    epollfd = epoll_create(255);
+    if (epollfd == -1) {
+        perror("epoll_create1");
+        exit(EXIT_FAILURE);
+    }
 }
 
 void multiblex::add_client(){
@@ -50,8 +56,7 @@ void multiblex::do_use_fd(int con_sockit){
     char buff[buff_size];
     ssize_t read_size = read(con_sockit, buff, buff_size);
     if (read_size == 0){
-        close(con_sockit);
-        cout << "con_sockit closed" << endl;
+        cout << "con_sockit void" << endl;
         return ;
     }
     if (read_size == -1){
@@ -59,7 +64,7 @@ void multiblex::do_use_fd(int con_sockit){
         close(con_sockit);
         return ;
     }
-    client[con_sockit].process_req(string("").append(buff, read_size), read_size);
+    client[con_sockit].parce_req(string("").append(buff, read_size));
 }
 
 void multiblex::use_clinet_fd(int con_sockit, int n){
@@ -68,33 +73,23 @@ void multiblex::use_clinet_fd(int con_sockit, int n){
         cout << "-------- do_use_fd Bdat -------- fd = "<<con_sockit<<endl;
         do_use_fd(con_sockit);
         cout << "------------ do_use_fd Salat -----------\n"<<endl;
-    }    
-    else if (client[con_sockit].body_state){
+    }
+    if (client[con_sockit].body_state && events[n].events & EPOLLOUT){
         client[con_sockit].process_req("",0);
-        cout << "Nchofo Had fd Chehal :"<<con_sockit<<endl;
+        respons = client[con_sockit].get_respons();
+        write(con_sockit, respons.c_str(), respons.size());
+        cout<<"in: 1 res: "<<respons<<endl;
         if (!client[con_sockit].method || client[con_sockit].method->end){
-            respons = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: ";
-            stringstream ss;
-            ss << client[con_sockit].get_respons().length();
-            respons += ss.str();
-            respons += string("\r\n\r\n");
-            respons += client[con_sockit].get_respons();
-            write(con_sockit, respons.c_str(), respons.size());
             close(con_sockit);
             epoll_ctl(epollfd, EPOLL_CTL_DEL, con_sockit, &ev);
             client.erase(con_sockit);
-
+            cout<<"coniction with client: "<<con_sockit<<" ned"<<endl;
         }
     }
 }
 
 void multiblex::m_server(){
 
-    epollfd = epoll_create1(0);
-    if (epollfd == -1) {
-        perror("epoll_create1");
-        exit(EXIT_FAILURE);
-    }
 
     ev.events = EPOLLIN;
     ev.data.fd = listen_sock;
