@@ -1,6 +1,7 @@
 ## Welcome evreybody
 
-|Class|Subject|Houre|
-|-:|:-:|:-|
-|C1|Math|15:30|
-|C2|Arab|17:30|
+|Class|Description|
+|-:|:-:|
+|Request|parce the request and call the specific method|
+|Method|base class of the tree classes (Get/Post/Delete)|
+|Get|handle the method GET|
