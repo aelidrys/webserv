@@ -1,6 +1,7 @@
 #include "multiblex.hpp"
 
 multiblex::multiblex(){
+    gw_len = 0;
     addrlen = sizeof(address);
     address.sin_family = AF_INET;
     address.sin_addr.s_addr = INADDR_ANY;
@@ -51,12 +52,11 @@ void multiblex::add_client(){
 }
 
 
-void multiblex::do_use_fd(int con_sockit){
+void multiblex::do_use_fd(int con_sockit, int event){
     size_t buff_size = 1000;
     char buff[buff_size];
     ssize_t read_size = read(con_sockit, buff, buff_size);
     if (read_size == 0){
-        cout << "con_sockit void" << endl;
         return ;
     }
     if (read_size == -1){
@@ -64,26 +64,31 @@ void multiblex::do_use_fd(int con_sockit){
         close(con_sockit);
         return ;
     }
-    client[con_sockit].parce_req(string("").append(buff, read_size));
+    client[con_sockit].process_req(string("").append(buff, read_size), read_size, event);
+    if (client[con_sockit].r_path == "/favicon.ico"){
+        cout<<"favicon fd: "<<con_sockit<<" closed!"<<endl;
+        close(con_sockit);
+        epoll_ctl(epollfd, EPOLL_CTL_DEL, con_sockit, &ev);
+        client.erase(con_sockit);
+    }
 }
 
 void multiblex::use_clinet_fd(int con_sockit, int n){
 
     if (events[n].events & EPOLLIN){
-        cout << "-------- do_use_fd Bdat -------- fd = "<<con_sockit<<endl;
-        do_use_fd(con_sockit);
-        cout << "------------ do_use_fd Salat -----------\n"<<endl;
+        do_use_fd(con_sockit, EPOLLIN);
     }
-    if (client[con_sockit].body_state && events[n].events & EPOLLOUT){
-        client[con_sockit].process_req("",0);
+    else if (client[con_sockit].body_state && events[n].events & EPOLLOUT){
+        client[con_sockit].process_req("",0,EPOLLOUT);
         respons = client[con_sockit].get_respons();
         write(con_sockit, respons.c_str(), respons.size());
-        cout<<"in: 1 res: "<<respons<<endl;
-        if (!client[con_sockit].method || client[con_sockit].method->end){
-            close(con_sockit);
+        if (client[con_sockit].method && client[con_sockit].method->end){
+            cout<<"fd: "<<con_sockit<<endl;
+            cout<<"errno: "<<errno<<endl;
             epoll_ctl(epollfd, EPOLL_CTL_DEL, con_sockit, &ev);
+            close(con_sockit);
             client.erase(con_sockit);
-            cout<<"coniction with client: "<<con_sockit<<" ned"<<endl;
+            cout<<"coniction with client: "<<con_sockit<<" end"<<endl;
         }
     }
 }
@@ -118,8 +123,3 @@ void multiblex::m_server(){
 multiblex::~multiblex(){
     ;
 }
-
-
-// void setnonblocking(int con_sockit){
-//     fcntl(con_sockit, F_SETFL , fcntl(con_sockit, F_GETFL, 0) | O_NONBLOCK);
-// }

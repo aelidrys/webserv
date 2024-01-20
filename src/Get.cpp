@@ -11,6 +11,7 @@ Get::Get(){
     types["png"] = "image/png";
     types["gif"] = "image/gif";
     types["json"] = "application/json";
+    types["mp4"] = "video/mp4";
     end = 0;
     opened = 0;
 }
@@ -24,6 +25,7 @@ Get::Get(const Get& oth){
     types["png"] = "image/png";
     types["gif"] = "image/gif";
     types["json"] = "application/json";
+    types["mp4"] = "video/mp4";
     *this = oth;
 }
 
@@ -51,6 +53,16 @@ void Get::set_content_type(){
         content_type = "application/octet-stream";
 }
 
+void Get::set_extentions(){
+    fstream json_file;
+    string line;
+    json_file.open("extensions.json",ios::in);
+    getline(json_file,line);
+    while (line.size()){
+        ;
+    }
+}
+
 void Get::open_file(){
     string tmp = req_path;
     string index = "/default.html";
@@ -58,7 +70,6 @@ void Get::open_file(){
     if (opendir(req_path.c_str())){
         tmp += index;
         content_type = "text/html";
-        cout<<"path joined"<<endl;
     }
     else
         set_content_type();
@@ -79,14 +90,19 @@ void Get::open_file(){
     ss<<file_len;
     respons += ss.str();
     respons += string("\r\n\r\n");
-    cout<<"file_len: "<<file_len<<endl;
+    cout<<"content_len: "<<file_len<<endl;
+    cout<<"content_type: "<<content_type<<endl;
 }
 
-void Get::process(std::string _body, size_t _body_size){
+int Get::process(string _body, size_t _body_size, int event){
     body = _body;
     body_size = _body_size;
 
-    cout << "GET Request Enter" << endl;
+    if (event == EPOLLIN){
+        cout << "GET->in" << endl;
+        return(0);
+    }
+    cout << "GET->out" << endl;
     respons = "";
     if (!opened)
         open_file();
@@ -100,15 +116,13 @@ void Get::process(std::string _body, size_t _body_size){
         if (src_file.gcount() < max_r)
             end = 1;
         res.resize(r_len);
-        cout<<"r_len: "<<r_len<<"\nend: "<<end<<endl;
         respons += res;
     }
-
     if (opened == -1){
         end = 1;
         respons = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: 13\r\n\r\nURI Not Found";
-        cout << "GET Request End" << endl;
     }
+    return(0);
 }
 
 Get::~Get(){

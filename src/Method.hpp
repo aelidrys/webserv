@@ -11,6 +11,9 @@
 #include <fcntl.h>
 #include <sys/types.h>
 #include <dirent.h>
+#include <sys/epoll.h>
+#include <netinet/in.h>
+#include <sys/socket.h>
 using namespace std;
 
 #ifndef METHOD_HPP
@@ -18,7 +21,6 @@ using namespace std;
 
 class Method
 {
-
 public:
     string respons;
     int end;
@@ -31,7 +33,7 @@ public:
     Method();
     Method(const Method& oth);
     Method& operator=(const Method& oth);
-    virtual void process(string body, size_t body_size) = 0;
+    virtual int process(string body, size_t body_size, int event) = 0;
     virtual ~Method();
 };
 

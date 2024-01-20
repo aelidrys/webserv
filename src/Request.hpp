@@ -26,7 +26,7 @@ public:
     Request(const Request& req);
     Request& operator=(const Request& oth);
     void parce_req(const std::string& req1);
-    void process_req(const string &req, size_t read_len);
+    void process_req(const string &req, size_t read_len, int event);
     void show_inf() const;
     int parce_line(const std::string& line);
     int parce_rline(const std::string& line);

@@ -149,11 +149,11 @@ void Request::parce_req(const string &req)
     method = create_method(type);
 }
 
-void    Request::process_req(const string &req, size_t read_len){
+void    Request::process_req(const string &req, size_t read_len, int event){
     cout << "----------- process_req Bdat ------------\n";
     parce_req(req);
     if (body_state && method)
-        method->process(body, read_len);
+        method->process(body, read_len, event);
     cout << "------------ process_req Salat ------------\n";
 }
 
