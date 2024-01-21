@@ -5,15 +5,17 @@ Request::Request()
     method = NULL;
     body_state = 0;
     body_size = 0;
+    error = 0;
     root_path = "/nfs/homes/aelidrys/Desktop/webserv/root_dir";
 }
 
 
-Request::Request(string& root_path1){
+Request::Request(const Servers &ser){
     method = NULL;
     body_state = 0;
     body_size = 0;
-    root_path = root_path1;
+    error = 0;
+    root_path = ser.root[0];
 }
 
 Request::Request(const Request& req1){
@@ -24,6 +26,7 @@ Request::Request(const Request& req1){
 Request& Request::operator=(const Request& oth){
     if (this != &oth){
         delete method;
+        error = oth.error;
         method = oth.method;
         body_state = oth.body_state;
         body_size = oth.body_size;
@@ -150,11 +153,9 @@ void Request::parce_req(const string &req)
 }
 
 void    Request::process_req(const string &req, size_t read_len, int event){
-    cout << "----------- process_req Bdat ------------\n";
     parce_req(req);
     if (body_state && method)
         method->process(body, read_len, event);
-    cout << "------------ process_req Salat ------------\n";
 }
 
 

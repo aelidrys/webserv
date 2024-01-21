@@ -3,36 +3,21 @@
 
 
 Get::Get(){
-    types["html"] = "text/html";
-    types["htm"] = "text/html";
-    types["css"] = "text/css";
-    types["jpeg"] = "image/jpeg";
-    types["jpg"] = "image/jpeg";
-    types["png"] = "image/png";
-    types["gif"] = "image/gif";
-    types["json"] = "application/json";
-    types["mp4"] = "video/mp4";
+    set_extentions();
     end = 0;
     opened = 0;
 }
 
 Get::Get(const Get& oth){
-    types["html"] = "text/html";
-    types["htm"] = "text/html";
-    types["css"] = "text/css";
-    types["jpeg"] = "image/jpeg";
-    types["jpg"] = "image/jpeg";
-    types["png"] = "image/png";
-    types["gif"] = "image/gif";
-    types["json"] = "application/json";
-    types["mp4"] = "video/mp4";
+    set_extentions();
     *this = oth;
 }
 
 Get& Get::operator=(const Get& oth){
     if (this != &oth){
-        // respons = oth.respons;
-        // end = oth.end;
+        respons = oth.respons;
+        end = oth.end;
+        content_type = oth.content_type;
         headers = oth.headers;
         http_v = oth.http_v;
         req_path = oth.req_path;
@@ -54,13 +39,26 @@ void Get::set_content_type(){
 }
 
 void Get::set_extentions(){
-    fstream json_file;
-    string line;
-    json_file.open("extensions.json",ios::in);
-    getline(json_file,line);
-    while (line.size()){
-        ;
-    }
+    types["html"] = "text/html";
+    types["htm"] = "text/html";
+    types["css"] = "text/css";
+    types["jpeg"] = "image/jpeg";
+    types["jpg"] = "image/jpeg";
+    types["png"] = "image/png";
+    types["gif"] = "image/gif";
+    types["json"] = "application/json";
+    types["mp4"] = "video/mp4";
+    types["mp3"] = "audio/mpeg";
+    types["js"] = "application/javascript";
+    types["bmp"] = "image/bmp";
+    types["ico"] = "image/x-icon";
+    types["pdf"] = "application/pdf";
+    types["txt"] = "text/plain";
+    types["xml"] = "application/xml";
+    types["zip"] = "application/zip";
+    types["tar"] = "application/x-tar";
+    types["gz"] = "application/gzip";
+    
 }
 
 void Get::open_file(){

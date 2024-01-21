@@ -5,6 +5,7 @@ CXX = c++
 CPPFLAG = -Wall -Wextra -Werror -std=c++98 -fsanitize=address -g3
 
 SRC_DIR = src
+SRC_DIR1 = src/src1
 
 OBJ_DIR = obj
 

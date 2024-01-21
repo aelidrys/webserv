@@ -16,14 +16,14 @@ size_t file_len;
 fstream src_file;
 map<string,string> types;
 string content_type;
+void set_content_type();
+void set_extentions();
+void open_file();
 public:    
     Get();
     Get(const Get& oth);
     Get& operator=(const Get& oth);
-    void set_content_type();
-    void set_extentions();
     int process(std::string body, size_t body_size, int event);
-    void open_file();
     ~Get();
 };
 
