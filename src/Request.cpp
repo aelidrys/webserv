@@ -10,13 +10,13 @@ Request::Request()
 }
 
 
-Request::Request(const Servers &ser){
-    method = NULL;
-    body_state = 0;
-    body_size = 0;
-    error = 0;
-    root_path = ser.root[0];
-}
+// Request::Request(const Servers &ser){
+//     method = NULL;
+//     body_state = 0;
+//     body_size = 0;
+//     error = 0;
+//     root_path = ser.root[0];
+// }
 
 Request::Request(const Request& req1){
     method = NULL;

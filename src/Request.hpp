@@ -29,7 +29,7 @@ public:
     std::map<std::string, std::string> headers;
 
     Request();
-    Request(const Servers &ser);
+    // Request(const Servers &ser);
     Request(const Request& req);
     Request& operator=(const Request& oth);
     void process_req(const string &req, size_t read_len, int event);

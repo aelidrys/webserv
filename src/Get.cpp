@@ -97,10 +97,10 @@ int Get::process(string _body, size_t _body_size, int event){
     body_size = _body_size;
 
     if (event == EPOLLIN){
-        cout << "GET->in" << endl;
+        // cout << "GET->in" << endl;
         return(0);
     }
-    cout << "GET->out" << endl;
+    // cout << "GET->out" << endl;
     respons = "";
     if (!opened)
         open_file();
