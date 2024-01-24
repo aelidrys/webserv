@@ -4,6 +4,10 @@
 
 Get::Get(){
     set_extentions();
+    cmds = new char *[3];
+    cmds[0] = NULL;
+    cmds[1] = NULL;
+    cmds[2] = NULL;
     end = 0;
     opened = 0;
 }
@@ -15,22 +19,21 @@ Get::Get(const Get& oth){
 
 Get& Get::operator=(const Get& oth){
     if (this != &oth){
-        respons = oth.respons;
-        end = oth.end;
-        content_type = oth.content_type;
-        headers = oth.headers;
+        serv = oth.serv;
         http_v = oth.http_v;
-        req_path = oth.req_path;
         r_path = oth.r_path;
+        headers = oth.headers;
+        req_path = oth.req_path;
+        fullUri_path = oth.fullUri_path;
     }
     return *this;
 }
 
 void Get::set_content_type(){
-    size_t pos = r_path.find(".");
-    if (pos != string::npos && pos+1 < r_path.size()){
-        if (types.find(r_path.substr(pos+1)) != types.end())
-            content_type = types.find(r_path.substr(pos+1))->second;
+    size_t pos = fullUri_path.find(".");
+    if (pos != string::npos && pos+1 < fullUri_path.size()){
+        if (types.find(fullUri_path.substr(pos+1)) != types.end())
+            content_type = types.find(fullUri_path.substr(pos+1))->second;
         else
             content_type = "application/octet-stream";
     }
@@ -61,21 +64,13 @@ void Get::set_extentions(){
     
 }
 
-void Get::open_file(){
-    string tmp = req_path;
-    string index = "/default.html";
-    cout<<"open file"<<endl;
-    if (opendir(req_path.c_str())){
-        tmp += index;
-        content_type = "text/html";
-    }
-    else
-        set_content_type();
-    src_file.open(tmp.c_str(), ios::in);
+void Get::open_file(const string& file_name){
+
+    src_file.open(file_name.c_str(), ios::in);
     opened = 1;
     if (!src_file.is_open()){
         opened = -1;
-        cout<<"open file "<<tmp<<" faild"<<endl;
+        cout<<"open file "<<file_name.c_str()<<" faild"<<endl;
         return;
     }
 
@@ -92,18 +87,11 @@ void Get::open_file(){
     cout<<"content_type: "<<content_type<<endl;
 }
 
-int Get::process(string _body, size_t _body_size, int event){
-    body = _body;
-    body_size = _body_size;
+void Get::get(const string& file_name){
 
-    if (event == EPOLLIN){
-        // cout << "GET->in" << endl;
-        return(0);
-    }
-    // cout << "GET->out" << endl;
     respons = "";
     if (!opened)
-        open_file();
+        open_file(file_name);
     ssize_t r_len, max_r = 1000;
 
     if (opened == 1){
@@ -120,9 +108,63 @@ int Get::process(string _body, size_t _body_size, int event){
         end = 1;
         respons = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: 13\r\n\r\nURI Not Found";
     }
+}
+
+int Get::process(string _body, size_t _body_size, int event){
+    body = _body;
+    body_size = _body_size;
+
+    if (event == EPOLLIN)
+        return(0);
+    get(fullUri_path);
     return(0);
 }
 
+void Get::get_bycgi(const string& file_name){
+     exta = "";
+    size_t pos = file_name.find(".");
+    if ( pos == string::npos)
+    {
+        throw "Error in Extation form\n";
+    }
+    else
+        exta.append(&file_name[pos]);
+    string cmdCgi = serv.UriLocation.getCmdCgi(exta);
+    cmds[0] =  new char[cmdCgi.length() + 1];
+    strcpy(cmds[0],cmdCgi.c_str());
+    cmds[1] = new char[ file_name.length() + 1];
+    strcpy(cmds[1],file_name.c_str());
+    
+    cout<<"cmd :"<<cmds[0]<<endl;
+    cout<<"arg :"<<cmds[1]<<endl;
+    cmds[2] = NULL;
+}
+
+void Get::exec_cgi(){
+    int pid = fork();
+    if(pid < 0){
+      perror("fork fail");
+      exit(EXIT_FAILURE);
+    }
+    fd = open("out.txt",O_CREAT | O_RDWR | O_TRUNC,0644);
+    std::cout<<"fd : in cgi"<<fd<<endl;
+    char * cmd;
+    cmd = cmds[0];
+    if (pid == 0)
+    {
+        dup2(fd, STDOUT_FILENO);
+        if(execve(cmd,cmds,NULL) == -1)
+        {
+            std::cout<<"No exec\n";
+            perror("execve");
+            exit(1);
+            
+        }
+    }
+    waitpid(pid,NULL,0);
+    close(fd);
+}
+
 Get::~Get(){
-    ;
+	delete [] cmds;
 }

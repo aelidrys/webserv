@@ -10,13 +10,14 @@ Request::Request()
 }
 
 
-// Request::Request(const Servers &ser){
-//     method = NULL;
-//     body_state = 0;
-//     body_size = 0;
-//     error = 0;
-//     root_path = ser.root[0];
-// }
+Request::Request(const Servers &ser){
+    method = NULL;
+    body_state = 0;
+    body_size = 0;
+    error = 0;
+    serv = ser;
+    root_path = ser.root[0];
+}
 
 Request::Request(const Request& req1){
     method = NULL;
@@ -37,6 +38,8 @@ Request& Request::operator=(const Request& oth){
         http_v = oth.http_v;
         body = oth.body;
         headers = oth.headers;
+        uri = oth.uri;
+        serv = oth.serv;
     }
     return *this;
 }
@@ -53,7 +56,6 @@ int Request::spl_reqh_body(string s1)
         body = s1.substr(s1.find("\r\n\r\n", 0) + 4);
         cout << "--_______Lheaders Te9raw Kolhom________--\n" << endl;
         req_h += s1.substr(0, s1.find("\r\n\r\n", 0));
-        // cout <<"#################\n"<< req_h <<"\n##############"<< endl;
         body_state = 1;
         body_size = body.size();
         return 1;
@@ -86,13 +88,14 @@ int Request::parce_rline(const string &rline){
     ss<<rline;
     getline(ss, tmp, ' ');
     if (tmp != "GET" && tmp != "POST" && tmp != "DELETE"){
-        cerr << "ERROE: Unkounu Method " << tmp << endl;
+        cerr << "ERROE: Unkounu Method " << rline << endl;
         return 0;
     }
     type = tmp;
     getline(ss, tmp, ' ');
     r_path = tmp;
-    req_path = root_path + r_path;
+    uri = tmp;
+    req_path = root_path + uri;
     getline(ss, tmp);
      if (tmp != "HTTP/1.1\r" && tmp != "HTTP/1.1"){
         cout << "ERROE: Unkounu Http Version " << tmp << endl;
@@ -108,7 +111,7 @@ int Request::parce_line(const string &line)
     string key;
     string value;
 
-    ss << line;
+    ss<<line;
     getline(ss, key, ':');
     getline(ss, value, ' ');
     getline(ss, value, '\r');
@@ -149,6 +152,8 @@ void Request::parce_req(const string &req)
         if (line.size() && !parce_line(line))
             break;
     }
+    cout<<"uri: "<<uri<<endl;
+    serv.FillData(uri);
     method = create_method(type);
 }
 
@@ -159,15 +164,6 @@ void    Request::process_req(const string &req, size_t read_len, int event){
 }
 
 
-void Request::show_inf() const
-{
-    map<string, string>::const_iterator it;
-    cout<<"Request line -> : "<<type<<" "<< r_path<<" "<< http_v<< endl;
-    for (it = headers.begin(); it != headers.end(); it++)
-        cout << "||" << it->first << " => " << it->second << "||" << endl;
-    cout << "\n$$$$  body_size = "<<body_size<<" b_state: "<<body_state;
-    cout <<" $$$$$\n ----<body>---- \n" << body << endl;
-}
 
 Method* Request::create_method(const string &type){
     Method* m = NULL;
@@ -182,8 +178,10 @@ Method* Request::create_method(const string &type){
     if (m){
         m->headers = headers;
         m->http_v = http_v;
-        m->r_path = r_path;
+        m->r_path = uri;
         m->req_path = req_path;
+        m->fullUri_path = serv.rootUri;
+        m->serv = serv;
     }
     return (m);
 }
@@ -196,4 +194,17 @@ string Request::get_respons() const{
 
 Request::~Request(){
     delete method;
+}
+
+/////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////
+
+void Request::show_inf() const
+{
+    map<string, string>::const_iterator it;
+    cout<<"Request line -> : "<<type<<" "<< r_path<<" "<< http_v<< endl;
+    for (it = headers.begin(); it != headers.end(); it++)
+        cout << "||" << it->first << " => " << it->second << "||" << endl;
+    cout << "\n$$$$  body_size = "<<body_size<<" b_state: "<<body_state;
+    cout <<" $$$$$\n ----<body>---- \n" << body << endl;
 }
