@@ -178,7 +178,7 @@ Method* Request::create_method(const string &type){
     if (m){
         m->headers = headers;
         m->http_v = http_v;
-        m->r_path = uri;
+        m->uri = uri;
         m->req_path = req_path;
         m->fullUri_path = serv.rootUri;
         m->serv = serv;

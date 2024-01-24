@@ -18,7 +18,6 @@ OBJ = $(patsubst $(SRC_DIR)/%.cpp, $(OBJ_DIR)/%.o, $(SRC))\
 all : $(NAME)
 
 $(NAME) : $(OBJ)
-	@echo "obj filse" $(OBJ)
 	$(CXX) $(CPPFLAG) $(OBJ) -o $(NAME)
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp | $(OBJ_DIR)

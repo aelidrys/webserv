@@ -27,7 +27,7 @@ public:
     int end;
 
     Servers serv;
-    string r_path;
+    string uri;
     string fullUri_path;
     string req_path;
     string http_v;

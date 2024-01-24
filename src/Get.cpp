@@ -21,7 +21,7 @@ Get& Get::operator=(const Get& oth){
     if (this != &oth){
         serv = oth.serv;
         http_v = oth.http_v;
-        r_path = oth.r_path;
+        uri = oth.uri;
         headers = oth.headers;
         req_path = oth.req_path;
         fullUri_path = oth.fullUri_path;
@@ -31,6 +31,12 @@ Get& Get::operator=(const Get& oth){
 
 void Get::set_content_type(){
     size_t pos = fullUri_path.find(".");
+    // if (serv.Is_cgi){
+    //     string s1;
+    //     content_type = "text/html";
+    //     getline(src_file,s1);
+    //     getline(src_file,s1);
+    // }
     if (pos != string::npos && pos+1 < fullUri_path.size()){
         if (types.find(fullUri_path.substr(pos+1)) != types.end())
             content_type = types.find(fullUri_path.substr(pos+1))->second;
@@ -65,7 +71,6 @@ void Get::set_extentions(){
 }
 
 void Get::open_file(const string& file_name){
-
     src_file.open(file_name.c_str(), ios::in);
     opened = 1;
     if (!src_file.is_open()){
@@ -77,6 +82,7 @@ void Get::open_file(const string& file_name){
     src_file.seekg(0, std::ios::end);
     file_len = src_file.tellg();
     src_file.seekg(0, std::ios::beg);
+    set_content_type();
     respons = "HTTP/1.1 200 OK\r\nContent-Type: ";
     respons +=  content_type+string("\r\nContent-Length: ");
     stringstream ss;
@@ -88,7 +94,6 @@ void Get::open_file(const string& file_name){
 }
 
 void Get::get(const string& file_name){
-
     respons = "";
     if (!opened)
         open_file(file_name);
@@ -116,7 +121,10 @@ int Get::process(string _body, size_t _body_size, int event){
 
     if (event == EPOLLIN)
         return(0);
-    get(fullUri_path);
+    if (serv.Is_cgi)
+        get_bycgi(fullUri_path);
+    else
+        get(fullUri_path);
     return(0);
 }
 
