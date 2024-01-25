@@ -152,7 +152,6 @@ void Request::parce_req(const string &req)
         if (line.size() && !parce_line(line))
             break;
     }
-    cout<<"uri: "<<uri<<endl;
     serv.FillData(uri);
     method = create_method(type);
 }

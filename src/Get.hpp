@@ -9,25 +9,27 @@ using namespace std;
 
 class Get : public Method
 {
-string body;
+int fd;
 int body_size;
 int opened;
+int cgi_execueted;
+string body;
 size_t file_len;
 fstream src_file;
 map<string,string> types;
 string content_type;
 
-int fd;
-string exta;
+string extension;
 char **cmds;
-// std::string const *command[2];
+// char **env;
 
-void set_content_type();
+void set_content_type(const string& file_name);
 void set_extentions();
 void open_file(const string& file_name);
 void get(const string& file_name);
-void get_bycgi(const string& file_name);
+void get_bycgi();
 void exec_cgi();
+void set_cmd();
 public:
     Get();
     Get(const Get& oth);
