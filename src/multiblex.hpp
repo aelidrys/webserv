@@ -16,6 +16,7 @@ class multiblex
 {
 int addrlen;
 int epollfd;
+string buffer;
 string respons;
 struct sockaddr_in address;
 struct epoll_event ev, events[MAX_EVENTS];
@@ -25,9 +26,11 @@ public:
 
     multiblex();
     void m_server();
-    void do_use_fd(int con_sockit, int n);
+    void in_event(int con_sockit, int n);
     void use_clinet_fd(int con_sockit, int n);
     void add_client(int listen_sock);
+    int read_from_sockit(int sockit);
+    void stop_conection(int sockit);
     ~multiblex();
 };
 

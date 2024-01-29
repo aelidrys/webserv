@@ -11,6 +11,8 @@
 #include <fcntl.h>
 #include <sys/types.h>
 #include <dirent.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 #include <sys/epoll.h>
 #include <netinet/in.h>
 #include <sys/socket.h>

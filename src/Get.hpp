@@ -1,4 +1,5 @@
 #include "Method.hpp"
+#include <cstring>
 
 using namespace std;
 
@@ -9,7 +10,6 @@ using namespace std;
 
 class Get : public Method
 {
-int fd;
 int body_size;
 int opened;
 int cgi_execueted;
@@ -21,7 +21,7 @@ string content_type;
 
 string extension;
 char **cmds;
-// char **env;
+char **env;
 
 void set_content_type(const string& file_name);
 void set_extentions();
@@ -30,6 +30,7 @@ void get(const string& file_name);
 void get_bycgi();
 void exec_cgi();
 void set_cmd();
+void set_env();
 public:
     Get();
     Get(const Get& oth);

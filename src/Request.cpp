@@ -125,19 +125,9 @@ int Request::parce_line(const string &line)
     return 1;
 }
 
-
-int Request::req_done(){
-    if (!body_state)
-        return 0;
-    if (headers.find("Content-Length") != headers.end()){
-        if (body_size != (size_t)atoi(&headers.find("Content-Length")->second[0]))
-        return 0;
-    }
-    return 1;
-}
-
 void Request::parce_req(const string &req)
 {
+    std::stringstream sstr;
     string line;
 
     if (!spl_reqh_body(req))
@@ -173,7 +163,7 @@ Method* Request::create_method(const string &type){
     // if (type == "DELETE")
         // m = new Delete();
     else
-        cerr << "Unkounu Method" << endl;
+        cerr<<"Cannot Create Method: "<<type<<endl;
     if (m){
         m->headers = headers;
         m->http_v = http_v;
@@ -193,17 +183,4 @@ string Request::get_respons() const{
 
 Request::~Request(){
     delete method;
-}
-
-/////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////
-
-void Request::show_inf() const
-{
-    map<string, string>::const_iterator it;
-    cout<<"Request line -> : "<<type<<" "<< r_path<<" "<< http_v<< endl;
-    for (it = headers.begin(); it != headers.end(); it++)
-        cout << "||" << it->first << " => " << it->second << "||" << endl;
-    cout << "\n$$$$  body_size = "<<body_size<<" b_state: "<<body_state;
-    cout <<" $$$$$\n ----<body>---- \n" << body << endl;
 }

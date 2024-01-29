@@ -2,9 +2,8 @@
 
 int main(){
     try{
-
-    multiblex mlt;
-    mlt.m_server();
+        multiblex mlt;
+        mlt.m_server();
     }
     catch(const char* exp){
         cout<<exp<<endl;
