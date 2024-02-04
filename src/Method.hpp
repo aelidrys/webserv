@@ -38,7 +38,7 @@ public:
     Method();
     Method(const Method& oth);
     Method& operator=(const Method& oth);
-    virtual int process(string body, size_t body_size, int event) = 0;
+    virtual int process(string body, size_t body_size) = 0;
     virtual ~Method();
 };
 

@@ -88,7 +88,8 @@ int Request::parce_rline(const string &rline){
     ss<<rline;
     getline(ss, tmp, ' ');
     if (tmp != "GET" && tmp != "POST" && tmp != "DELETE"){
-        cerr << "ERROE: Unkounu Method " << rline << endl;
+        cerr << "ERROE: Unkounu Method " << tmp << endl;
+        error = Method_Unkounu;
         return 0;
     }
     type = tmp;
@@ -97,8 +98,9 @@ int Request::parce_rline(const string &rline){
     uri = tmp;
     req_path = root_path + uri;
     getline(ss, tmp);
-     if (tmp != "HTTP/1.1\r" && tmp != "HTTP/1.1"){
+    if (tmp != "HTTP/1.1\r" && tmp != "HTTP/1.1"){
         cout << "ERROE: Unkounu Http Version " << tmp << endl;
+        error = Httpv_Unkounu;
         return 0;
     }
     http_v = tmp;
@@ -114,42 +116,45 @@ int Request::parce_line(const string &line)
     ss<<line;
     getline(ss, key, ':');
     getline(ss, value, ' ');
+    value.clear();
     getline(ss, value, '\r');
     if (!parce_key(key) && value.size())
         return 0;
     if (value.size() == 0){
         cout << "ERROR: No Value For Key " << key << endl;
+        error = Invalid_Header;
         return 0;
     }
     headers[key] = value;
     return 1;
 }
 
-void Request::parce_req(const string &req)
+int Request::parce_req(const string &req)
 {
     std::stringstream sstr;
     string line;
 
     if (!spl_reqh_body(req))
-        return ;
+        return 1;
     sstr << req_h;
     getline(sstr,line);
     if (!parce_rline(line))
-        return ;
+        return 0;
     while (sstr.peek() != -1)
     {
         getline(sstr, line);
         if (line.size() && !parce_line(line))
-            break;
+            return 0;
     }
     serv.FillData(uri);
     method = create_method(type);
+    return 1;
 }
 
-void    Request::process_req(const string &req, size_t read_len, int event){
+void    Request::process_req(const string &req, size_t read_len){
     parce_req(req);
     if (body_state && method)
-        method->process(body, read_len, event);
+        method->process(body, read_len);
 }
 
 
@@ -159,9 +164,9 @@ Method* Request::create_method(const string &type){
     if (type == "GET")
         m = new Get();
     // if (type == "POST")
-        // m = new Post();
+    //     m = new Post();
     // if (type == "DELETE")
-        // m = new Delete();
+    //     m = new Delete();
     else
         cerr<<"Cannot Create Method: "<<type<<endl;
     if (m){

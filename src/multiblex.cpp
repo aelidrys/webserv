@@ -43,13 +43,13 @@ int multiblex::read_from_sockit(int sockit){
     return read_size;
 }
 
-void multiblex::in_event(int con_sockit, int event){
+void multiblex::in_event(int con_sockit){
     ssize_t read_size;
 
     read_size = read_from_sockit(con_sockit);
     if (read_size <= 0)
         return;
-    client[con_sockit].process_req(buffer, read_size, event);
+    client[con_sockit].process_req(buffer, read_size);
     respons = client[con_sockit].get_respons();
     write(con_sockit, respons.c_str(), respons.size());
     if (client[con_sockit].uri == "/favicon.ico"){
@@ -68,10 +68,10 @@ void multiblex::use_clinet_fd(int con_sockit, int n){
     }
     if (events[n].events & EPOLLIN){
         // process Request with in mode
-        in_event(con_sockit, EPOLLIN);
+        in_event(con_sockit);
     }
     else if (client[con_sockit].body_state && events[n].events & EPOLLOUT){
-        client[con_sockit].process_req("",0,EPOLLOUT);
+        client[con_sockit].process_req("",0);
         respons = client[con_sockit].get_respons();
         write(con_sockit, respons.c_str(), respons.size());
         if (client[con_sockit].method && client[con_sockit].method->end)

@@ -26,7 +26,7 @@ public:
 
     multiblex();
     void m_server();
-    void in_event(int con_sockit, int n);
+    void in_event(int con_sockit);
     void use_clinet_fd(int con_sockit, int n);
     void add_client(int listen_sock);
     int read_from_sockit(int sockit);

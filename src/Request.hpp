@@ -6,14 +6,16 @@ using namespace std;
 #define REQUEST_HPP
 
 enum errors{
-    Method_Unkounu = 1
+    Method_Unkounu = 1,
+    Httpv_Unkounu = 2,
+    Invalid_Header = 4,
 };
 
 class Request
 {
 std::string req_h;
 std::string root_path;
-void parce_req(const std::string& req1);
+int parce_req(const std::string& req1);
 int parce_line(const std::string& line);
 int parce_rline(const std::string& line);
 int parce_key(const std::string& key);
@@ -37,7 +39,7 @@ public:
     Request(const Servers &ser);
     Request(const Request& req);
     Request& operator=(const Request& oth);
-    void process_req(const string &req, size_t read_len, int event);
+    void process_req(const string &req, size_t read_len);
     string get_respons() const;
     
     ~Request();
