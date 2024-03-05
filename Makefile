@@ -1,38 +1,34 @@
-NAME = webser
+NAME = webserv
+
+SRC =   main.cpp \
+  		MainSrc/ParceConf.cpp\
+		MainSrc/Servers.cpp \
+		MainSrc/Location.cpp \
+		MainSrc/Multiplexing.cpp\
+	  	MainSrc/Request.cpp\
+	  	Methods/Get.cpp\
+	  	Methods/Post.cpp\
+	  	Methods/Method.cpp\
+		Methods/Cgi.cpp\
+		Methods/Delete.cpp\
 
 CXX = c++
 
-CPPFLAG = -Wall -Wextra -Werror -std=c++98 -fsanitize=address -g3
+CXXFLAGS =  -Wall -Wextra -Werror -std=c++98 -fsanitize=address -g3 
 
-SRC_DIR = src
-SRC_DIR1 = abouassi
+OBJ = ${SRC:.cpp=.o}
 
-OBJ_DIR = obj
+RM	= rm -rf
 
-SRC = $(wildcard $(SRC_DIR)/*.cpp)
-SRC1 = $(wildcard $(SRC_DIR1)/*.cpp)
+all : ${NAME}
 
-OBJ = $(patsubst $(SRC_DIR)/%.cpp, $(OBJ_DIR)/%.o, $(SRC))\
-	$(patsubst $(SRC_DIR1)/%.cpp, $(OBJ_DIR)/%.o, $(SRC1))
+${NAME} : ${OBJ}
+		${CXX} ${CXXFLAGS} ${OBJ} -o ${NAME}
 
-all : $(NAME)
+clean : 
+		${RM} ${OBJ}
 
-$(NAME) : $(OBJ)
-	$(CXX) $(CPPFLAG) $(OBJ) -o $(NAME)
+fclean : clean
+		${RM} ${NAME}
 
-$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp | $(OBJ_DIR)
-	$(CXX) $(CPPFLAG) -c $< -o $@
-
-$(OBJ_DIR)/%.o: $(SRC_DIR1)/%.cpp | $(OBJ_DIR)
-	$(CXX) $(CPPFLAG) -c $< -o $@
-
-$(OBJ_DIR):
-	mkdir -p $(OBJ_DIR)
-
-clean:
-	rm -rf $(OBJ_DIR)
-
-fclean:
-	rm -rf $(OBJ_DIR) $(NAME)
-
-re: fclean all
+re	: fclean all

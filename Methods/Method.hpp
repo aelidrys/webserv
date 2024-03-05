@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <time.h>
 #include <sys/types.h>
 #include <dirent.h>
 #include <sys/types.h>
@@ -16,7 +17,7 @@
 #include <sys/epoll.h>
 #include <netinet/in.h>
 #include <sys/socket.h>
-#include "../abouassi/ParceConf.hpp"
+#include "../MainSrc/Servers.hpp"
 using namespace std;
 
 #ifndef METHOD_HPP
@@ -24,21 +25,20 @@ using namespace std;
 
 class Method
 {
+protected:
 public:
-    string respons;
+    int err;
     int end;
-
-    Servers serv;
     string uri;
-    string fullUri_path;
-    string req_path;
     string http_v;
+    string fullUri_path;
+    string respons;
+    Servers serv;
     map<string, string> headers;
-
+    virtual int process(string body, int event) = 0;
     Method();
     Method(const Method& oth);
     Method& operator=(const Method& oth);
-    virtual int process(string body, size_t body_size) = 0;
     virtual ~Method();
 };
 

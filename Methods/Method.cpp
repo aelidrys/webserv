@@ -1,7 +1,7 @@
 #include "Method.hpp"
 
 Method::Method(){
-    ;
+    err = 0;
 }
 
 Method::Method(const Method& oth){
@@ -10,13 +10,13 @@ Method::Method(const Method& oth){
 
 Method& Method::operator=(const Method& oth){
     if (this != &oth){
+        err = oth.err;
         end = oth.end;
         serv = oth.serv;
         uri = oth.uri;
         http_v = oth.http_v;
         headers = oth.headers;
         respons = oth.respons;
-        req_path = oth.req_path;
         fullUri_path = oth.fullUri_path;
     }
     return *this;
